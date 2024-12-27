@@ -1,0 +1,13 @@
+money_manager/
+│
+├── main.py           # Main application file
+├── pages/
+│   ├── __init__.py  # Empty file to make pages a package
+│   ├── data_entry.py    # Data entry page
+│   └── view_transactions.py  # Transactions view page
+├── database/
+│   ├── __init__.py  # Empty file to make database a package
+│   └── db_manager.py    # Database operations
+└── utils/
+    ├── __init__.py  # Empty file to make utils a package
+    └── helpers.py   # Helper functions
