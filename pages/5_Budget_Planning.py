@@ -13,6 +13,7 @@ from database.db_manager import (
     get_transactions,
     get_category_thresholds,
     update_category_threshold,
+    get_all_categories
 )
 from utils.helpers import format_currency
 
@@ -39,11 +40,8 @@ with tab1:
     with col1:
         # Budget setting form
         with st.form("budget_form"):
-            CATEGORIES = [
-                "Housing", "Transportation", "Groceries", "Food & Dining",
-                "Shopping", "Entertainment", "Healthcare", "Education",
-                "Utilities", "Insurance", "Savings", "Investments", "Other"
-            ]
+            # Get all categories except Income
+            CATEGORIES = [cat for cat in get_all_categories() if cat != "Income"]
             
             st.write("Set monthly budget limits for each category:")
             
@@ -151,6 +149,9 @@ with tab2:
         
         # Get budget limits
         budget_df = get_category_thresholds()
+        
+        # Get all categories except Income
+        CATEGORIES = [cat for cat in get_all_categories() if cat != "Income"]
         
         # Create progress bars for each category
         st.write(f"Budget Progress - {calendar.month_name[selected_month]} {selected_year}")

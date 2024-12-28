@@ -6,18 +6,24 @@ A comprehensive personal finance management application built with Streamlit and
 
 ### Core Functionality
 - **Transaction Management**: Add, edit, and delete both regular and recurring transactions
+- **CSV Import**: Bulk import transactions from CSV files
 - **Budget Planning**: Set and monitor category-wise monthly budgets
+- **Custom Categories**: Add and manage custom transaction categories
 - **Financial Reports**: Generate detailed monthly and yearly reports
 - **Data Visualization**: Interactive charts and graphs for financial analysis
 - **Category Tracking**: Monitor spending across different categories
 - **Export Options**: Export data and reports to CSV or Excel formats
 
 ### Key Components
-- **Data Entry**: Easy-to-use interface for adding transactions
+- **Data Entry**:
+  - Manual transaction entry
+  - Fixed monthly transaction setup
+  - CSV file import for bulk transactions
 - **Transaction View**: Comprehensive transaction history with search and filter options
 - **Budget Tracking**: Visual representation of budget utilization
 - **Financial Analytics**: Detailed analysis of spending patterns
 - **Reports Generation**: Customizable financial reports
+- **Category Management**: Create and manage custom transaction categories
 
 ## 📋 Prerequisites
 
@@ -92,10 +98,24 @@ money_manager/
 
 ### Transaction Management
 - Add regular and recurring transactions
-- Categorize transactions
+- Bulk import transactions from CSV files
+- Categorize transactions with custom categories
 - Add comments and details
 - Edit or delete existing transactions
 - Search and filter functionality
+
+### CSV Import
+- Import multiple transactions at once
+- Supports standard CSV format
+- Data validation before import
+- Progress tracking during import
+- Error reporting and success confirmation
+
+### Category Management
+- Create custom transaction categories
+- Manage existing categories
+- Set budgets for custom categories
+- Track spending in custom categories
 
 ### Budget Planning
 - Set monthly budgets by category
@@ -122,6 +142,22 @@ money_manager/
 - No external data transmission
 - All sensitive information stays on your machine
 
+## CSV Import Format
+
+To import transactions via CSV, your file should have the following structure:
+```
+date,type,category,amount,comment
+2024-12-01,Expense,Groceries,150.50,Monthly groceries
+2024-12-02,Income,Salary,3000.00,December salary
+```
+
+Required columns:
+- `date`: Date in YYYY-MM-DD format
+- `type`: Either "Income" or "Expense"
+- `category`: Must match existing categories
+- `amount`: Positive number
+- `comment`: Optional description
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
@@ -136,18 +172,8 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 👥 Authors
-
-- Your Name - *Initial work* - [YourGitHub](https://github.com/yourusername)
-
 ## 🙏 Acknowledgments
 
 - Streamlit team for the amazing framework
 - All contributors who participate in this project
 - The open source community for their invaluable resources
-
-## 📧 Contact
-
-Your Name - your.email@example.com
-
-Project Link: [https://github.com/yourusername/money-manager](https://github.com/yourusername/money-manager)

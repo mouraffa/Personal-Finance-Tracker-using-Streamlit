@@ -11,7 +11,11 @@ import calendar
 root_path = Path(__file__).parent.parent
 sys.path.append(str(root_path))
 
-from database.db_manager import get_transactions
+from database.db_manager import (
+    get_transactions,
+    get_category_thresholds,
+    get_all_categories
+)
 from utils.helpers import format_currency
 
 st.set_page_config(
@@ -32,6 +36,9 @@ if not df.empty:
     # Add month and year columns for easier filtering
     df['month'] = df['date'].dt.month
     df['year'] = df['date'].dt.year
+    
+    # Get all categories
+    categories = get_all_categories()
     
     # Sidebar filters
     st.sidebar.header("Filters")

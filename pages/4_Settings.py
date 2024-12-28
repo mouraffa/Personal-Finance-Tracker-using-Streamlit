@@ -11,7 +11,11 @@ from database.db_manager import (
     get_setting,
     update_setting,
     get_category_thresholds,
-    update_category_threshold
+    update_category_threshold,
+    init_custom_categories,
+    get_all_categories,
+    add_custom_category,
+    delete_custom_category
 )
 
 st.set_page_config(
@@ -26,7 +30,7 @@ st.title("Settings ⚙️")
 init_settings_tables()
 
 # Create tabs for different settings categories
-tab1, tab2, tab3 = st.tabs(["Currency Settings", "Category Thresholds", "Notifications"])
+tab1, tab2, tab3, tab4 = st.tabs(["Currency Settings", "Category Management", "Category Thresholds", "Notifications"])
 
 # Currency Settings Tab
 with tab1:
@@ -67,8 +71,63 @@ with tab1:
             st.success("Currency settings updated successfully!")
             st.rerun()
 
-# Category Thresholds Tab
+# Category Management Tab
 with tab2:
+    st.subheader("Category Management")
+    
+    # Initialize custom categories table
+    init_custom_categories()
+    
+    # Get all categories
+    all_categories = get_all_categories()
+    
+    # Add new category
+    with st.form("add_category_form"):
+        st.write("Add New Category")
+        new_category = st.text_input(
+            "Category Name",
+            help="Enter the name of the new category"
+        ).strip()
+        
+        submit_category = st.form_submit_button("Add Category", type="primary")
+        
+        if submit_category and new_category:
+            if new_category in all_categories:
+                st.error("This category already exists!")
+            else:
+                if add_custom_category(new_category):
+                    st.success(f"Category '{new_category}' added successfully!")
+                    st.rerun()
+    
+    # Display and manage existing categories
+    st.write("### Existing Categories")
+    st.write("Default categories cannot be deleted.")
+    
+    # Define default categories
+    DEFAULT_CATEGORIES = {
+        "Housing", "Transportation", "Groceries", "Food & Dining",
+        "Shopping", "Entertainment", "Healthcare", "Education",
+        "Utilities", "Insurance", "Savings", "Investments",
+        "Income", "Other"
+    }
+    
+    # Create three columns for better layout
+    cols = st.columns(3)
+    for i, category in enumerate(sorted(all_categories)):
+        col_idx = i % 3
+        with cols[col_idx]:
+            if category in DEFAULT_CATEGORIES:
+                st.info(f"📌 {category} (Default)")
+            else:
+                col1, col2 = st.columns([3, 1])
+                col1.info(f"🏷️ {category}")
+                if col2.button("🗑️", key=f"del_{category}", help=f"Delete {category}"):
+                    if delete_custom_category(category):
+                        st.success(f"Category '{category}' deleted successfully!")
+                        st.rerun()
+
+# Category Thresholds Tab
+with tab3:
     st.subheader("Monthly Category Thresholds")
     st.info("""
     Set monthly spending limits for each category. You'll receive notifications when you approach or exceed these limits.
@@ -79,12 +138,8 @@ with tab2:
     thresholds_df = get_category_thresholds()
     current_thresholds = dict(zip(thresholds_df['category'], thresholds_df['monthly_limit']))
     
-    # Get categories from the database (reuse the list from data entry)
-    CATEGORIES = [
-        "Housing", "Transportation", "Groceries", "Food & Dining",
-        "Shopping", "Entertainment", "Healthcare", "Education",
-        "Utilities", "Insurance", "Savings", "Investments", "Other"
-    ]
+    # Get all categories (including custom ones)
+    categories = get_all_categories()
     
     # Create a form for threshold settings
     with st.form("threshold_form"):
@@ -92,16 +147,17 @@ with tab2:
         cols = st.columns(3)
         thresholds = {}
         
-        for i, category in enumerate(CATEGORIES):
-            col_idx = i % 3
-            with cols[col_idx]:
-                thresholds[category] = st.number_input(
-                    f"{category} Limit",
-                    min_value=0.0,
-                    value=float(current_thresholds.get(category, 0)),
-                    step=50.0,
-                    help=f"Set monthly spending limit for {category}"
-                )
+        for i, category in enumerate(categories):
+            if category != "Income":  # Skip Income category for thresholds
+                col_idx = i % 3
+                with cols[col_idx]:
+                    thresholds[category] = st.number_input(
+                        f"{category} Limit",
+                        min_value=0.0,
+                        value=float(current_thresholds.get(category, 0)),
+                        step=50.0,
+                        help=f"Set monthly spending limit for {category}"
+                    )
         
         submitted = st.form_submit_button("Save Thresholds", type="primary", use_container_width=True)
         
@@ -117,7 +173,7 @@ with tab2:
                 st.rerun()
 
 # Notifications Tab
-with tab3:
+with tab4:
     st.subheader("Notification Settings")
     st.info("Configure how you want to be notified about your spending.")
     

@@ -7,7 +7,7 @@ from pathlib import Path
 root_path = Path(__file__).parent.parent
 sys.path.append(str(root_path))
 
-from database.db_manager import get_transactions, DB_PATH
+from database.db_manager import get_transactions, DB_PATH, get_all_categories
 from utils.helpers import format_currency
 
 st.set_page_config(
@@ -46,9 +46,11 @@ if not df.empty:
                 ["Income", "Expense"]
             )
 
-    # Add category filter only if we have categories
-    categories = sorted(df['category'].unique().tolist())
-    if len(categories) > 1:  # If we have more than just the default category
+    # Get all categories (including custom ones)
+    categories = sorted(get_all_categories())
+    
+    # Add category filter
+    if len(categories) > 1:
         selected_categories = st.multiselect(
             "Categories",
             categories,
@@ -132,13 +134,12 @@ if not df.empty:
             if not expense_by_cat.empty:
                 expense_df = pd.DataFrame({
                     'Category': expense_by_cat.index,
-                    'Amount': [abs(val) for val in expense_by_cat.values]  # Fixed this line
+                    'Amount': [abs(val) for val in expense_by_cat.values]
                 })
                 expense_df['Amount'] = expense_df['Amount'].apply(format_currency)
                 st.dataframe(expense_df, use_container_width=True, hide_index=True)
             else:
                 st.info("No expense transactions in selected period")
-
     
     # Display all transactions
     st.subheader("All Transactions")

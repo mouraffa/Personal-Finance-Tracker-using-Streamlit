@@ -13,7 +13,8 @@ from database.db_manager import (
     get_transactions,
     update_transaction,
     delete_transaction,
-    search_transactions
+    search_transactions,
+    get_all_categories
 )
 from utils.helpers import format_currency
 
@@ -53,8 +54,41 @@ with col3:
         help="Filter transactions with amount less than this value"
     )
 
+# Update where we get and prepare the dataframe
+
 # Get transactions based on search criteria
 df = search_transactions(search_term, min_amount, max_amount) if any([search_term, min_amount, max_amount]) else get_transactions()
+
+if not df.empty:
+    # Make sure we only have one ID column
+    if 'rowid' in df.columns and 'id' in df.columns:
+        df = df.drop(columns=['rowid'])
+    elif 'rowid' in df.columns:
+        df = df.rename(columns={'rowid': 'id'})
+
+    # Convert date to datetime for sorting and format display
+    df['date'] = pd.to_datetime(df['date'])
+    df = df.sort_values('date', ascending=False)
+    
+    # Format amount for display
+    display_df = df.copy()
+    
+    # Verify we have unique column names
+    print("Column names:", display_df.columns.tolist())  # Debug print
+    
+    # Add formatted amount column
+    display_df['formatted_amount'] = display_df['amount'].apply(format_currency)
+    
+    # Add delete column if not present
+    if 'delete' not in display_df.columns:
+        display_df['delete'] = False
+        
+    # Verify no duplicate column names
+    assert len(display_df.columns) == len(set(display_df.columns)), "Duplicate columns found!"
+
+
+# Get all categories (including custom ones)
+categories = get_all_categories()
 
 if not df.empty:
     # Convert date to datetime for sorting and format display
@@ -108,12 +142,7 @@ if not df.empty:
             "category": st.column_config.SelectboxColumn(
                 "Category",
                 help="Transaction category",
-                options=[
-                    "Housing", "Transportation", "Groceries", "Food & Dining",
-                    "Shopping", "Entertainment", "Healthcare", "Education",
-                    "Utilities", "Insurance", "Savings", "Investments",
-                    "Income", "Other"
-                ],
+                options=sorted(categories),
                 width="medium"
             ),
             "amount": st.column_config.NumberColumn(

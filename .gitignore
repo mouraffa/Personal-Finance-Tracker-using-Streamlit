@@ -1,0 +1,13 @@
+# Ignore a specific folder
+.venv/
+data/
+database\__pycache__/
+pages\__pycache__/
+
+# Ignore specific files
+test.txt
+
+# Ignore files with specific extensions
+*.log
+*.txt
+*.db

@@ -139,8 +139,12 @@ def get_transactions():
         generate_recurring_transactions()
         
         conn = sqlite3.connect(DB_PATH)
-        # Only select id once and don't include rowid
-        df = pd.read_sql_query("SELECT id, date, type, category, amount, comment FROM transactions", conn)
+        # Only select specific columns and ensure no duplicates
+        query = """
+        SELECT DISTINCT id, date, type, category, amount, comment
+        FROM transactions
+        """
+        df = pd.read_sql_query(query, conn)
         conn.close()
         return df
     except Exception as e:
@@ -162,6 +166,10 @@ def init_settings_tables():
         c.execute('''CREATE TABLE IF NOT EXISTS category_thresholds
                      (category TEXT PRIMARY KEY,
                       monthly_limit REAL NOT NULL)''')
+        
+        # Create custom categories table
+        c.execute('''CREATE TABLE IF NOT EXISTS custom_categories
+                     (category TEXT PRIMARY KEY)''')
         
         # Insert default settings if they don't exist
         c.execute('''INSERT OR IGNORE INTO general_settings (setting_key, setting_value)
@@ -313,7 +321,11 @@ def search_transactions(search_term="", min_amount=None, max_amount=None):
         conn = sqlite3.connect(DB_PATH)
         
         # Build the query dynamically
-        query = "SELECT *, rowid as id FROM transactions WHERE 1=1"
+        query = """
+        SELECT DISTINCT id, date, type, category, amount, comment
+        FROM transactions 
+        WHERE 1=1
+        """
         params = []
         
         if search_term:
@@ -590,4 +602,67 @@ def migrate_database():
         return True
     except Exception as e:
         st.error(f"Error migrating database: {str(e)}")
+        return False
+    
+
+def init_custom_categories():
+    """Initialize the custom categories table"""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        
+        c.execute('''CREATE TABLE IF NOT EXISTS custom_categories
+                     (category TEXT PRIMARY KEY)''')
+        
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        st.error(f"Error initializing custom categories table: {str(e)}")
+
+def get_all_categories():
+    """Get all categories including default and custom ones"""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute("SELECT category FROM custom_categories")
+        custom_categories = [row[0] for row in c.fetchall()]
+        conn.close()
+        
+        # Combine default and custom categories
+        DEFAULT_CATEGORIES = [
+            "Housing", "Transportation", "Groceries", "Food & Dining",
+            "Shopping", "Entertainment", "Healthcare", "Education",
+            "Utilities", "Insurance", "Savings", "Investments",
+            "Income", "Other"
+        ]
+        
+        return sorted(list(set(DEFAULT_CATEGORIES + custom_categories)))
+    except Exception as e:
+        st.error(f"Error retrieving categories: {str(e)}")
+        return []
+
+def add_custom_category(category):
+    """Add a new custom category"""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute("INSERT OR IGNORE INTO custom_categories (category) VALUES (?)", (category,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        st.error(f"Error adding custom category: {str(e)}")
+        return False
+
+def delete_custom_category(category):
+    """Delete a custom category"""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute("DELETE FROM custom_categories WHERE category = ?", (category,))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        st.error(f"Error deleting custom category: {str(e)}")
         return False
