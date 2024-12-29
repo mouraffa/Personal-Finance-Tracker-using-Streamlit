@@ -35,8 +35,7 @@ A comprehensive personal finance management application built with Streamlit and
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/money-manager.git
-cd money-manager
+git clone [https://github.com/yourusername/money-manager.git](https://github.com/mouraffa/Personal-Finance-Tracker-using-Streamlit.git)
 ```
 
 2. Create and activate a virtual environment (recommended):
@@ -148,7 +147,7 @@ To import transactions via CSV, your file should have the following structure:
 ```
 date,type,category,amount,comment
 2024-12-01,Expense,Groceries,150.50,Monthly groceries
-2024-12-02,Income,Salary,3000.00,December salary
+2024-12-02,Income,Salary,000.00,December salary
 ```
 
 Required columns:
